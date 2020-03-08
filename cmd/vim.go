@@ -1,14 +1,13 @@
 package cmd
 
 import (
-	"os"
-
-	"gopkg.in/src-d/go-git.v4"
-
 	"log"
+	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"gopkg.in/src-d/go-git.v4"
 )
 
 // vimCmd represents the vim subcommand
@@ -24,21 +23,36 @@ var vimAddPkgCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		pkgURL := args[0]
 
-		log.Print("Adding " + pkgURL + " to vim packages")
+		pkgName := getPkgName(pkgURL)
+		dirPath := viper.GetString("VIM_PACKAGE_DIR") + "/" + pkgName
+		log.Print("Adding " + pkgURL + " to vim packages at " + dirPath)
+		err := os.MkdirAll(dirPath, os.ModePerm)
+		if err != nil {
+			log.Panic(err)
+		}
 
-		//location := viper.GetString("VIM_PACKAGE_DIR") + "/"
-		//log.Print(location)
-		_, err := git.PlainClone("", false, &git.CloneOptions{
+		_, err = git.PlainClone(dirPath, false, &git.CloneOptions{
 			URL:      pkgURL,
 			Depth:    1,
 			Progress: os.Stdout,
 		})
-
 		if err != nil {
-			log.Fatal(err)
+			log.Panic(err)
 		}
 		return err
 	},
+}
+
+func getPkgName(pkgURL string) string {
+	// pkgURL is assumed to be formatted as
+	// git@github.com:owner/repo.git
+	// or
+	// https://github.com/owner/repo.git
+
+	splitAddress := strings.Split(pkgURL, "/")
+	gitPkgName := splitAddress[len(splitAddress)-1]
+	pkgName := strings.Split(gitPkgName, ".")[0]
+	return pkgName
 }
 
 func init() {
