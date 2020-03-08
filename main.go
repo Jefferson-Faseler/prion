@@ -15,8 +15,8 @@ limitations under the License.
 */
 package main
 
-import "pandemic/cmd"
+import "github.com/Jefferson-Faseler/pandemic/cmd"
 
 func main() {
-  cmd.Execute()
+	cmd.Execute()
 }
