@@ -16,11 +16,20 @@ var vimCmd = &cobra.Command{
 	Short: "a subcommand for configuring vim",
 }
 
+var vimPkgCmd = &cobra.Command{
+	Use:   "pkg",
+	Short: "a subcommand for working with packages",
+}
+
 // vimAddPkgCmd represents the command for adding vim packages
 var vimAddPkgCmd = &cobra.Command{
-	Use:   "addpkg [pkg url]",
+	Use:   "add [pkg url]",
 	Short: "easily add vim packages",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			cmd.Help()
+			os.Exit(0)
+		}
 		pkgURL := args[0]
 
 		pkgName := getPkgName(pkgURL)
@@ -45,9 +54,13 @@ var vimAddPkgCmd = &cobra.Command{
 
 // vimRemovePkgCmd represents the command for adding vim packages
 var vimRemovePkgCmd = &cobra.Command{
-	Use:   "rmpkg [pkg url]",
+	Use:   "rm [pkg name]",
 	Short: "easily remove vim packages",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			cmd.Help()
+			os.Exit(0)
+		}
 		pkgName := args[0]
 
 		dirPath := viper.GetString("VIM_PACKAGE_DIR") + "/" + pkgName
@@ -74,8 +87,9 @@ func getPkgName(pkgURL string) string {
 
 func init() {
 	rootCmd.AddCommand(vimCmd)
-	vimCmd.AddCommand(vimAddPkgCmd)
-	vimCmd.AddCommand(vimRemovePkgCmd)
+	vimCmd.AddCommand(vimPkgCmd)
+	vimPkgCmd.AddCommand(vimAddPkgCmd)
+	vimPkgCmd.AddCommand(vimRemovePkgCmd)
 
 	// Here you will define your flags and configuration settings.
 
