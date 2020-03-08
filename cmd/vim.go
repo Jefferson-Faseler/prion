@@ -43,6 +43,23 @@ var vimAddPkgCmd = &cobra.Command{
 	},
 }
 
+// vimRemovePkgCmd represents the command for adding vim packages
+var vimRemovePkgCmd = &cobra.Command{
+	Use:   "rmpkg [pkg url]",
+	Short: "easily remove vim packages",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		pkgName := args[0]
+
+		dirPath := viper.GetString("VIM_PACKAGE_DIR") + "/" + pkgName
+		log.Print("Removing " + pkgName + " from vim packages found in " + dirPath)
+		err := os.RemoveAll(dirPath)
+		if err != nil {
+			log.Panic(err)
+		}
+		return err
+	},
+}
+
 func getPkgName(pkgURL string) string {
 	// pkgURL is assumed to be formatted as
 	// git@github.com:owner/repo.git
@@ -58,6 +75,7 @@ func getPkgName(pkgURL string) string {
 func init() {
 	rootCmd.AddCommand(vimCmd)
 	vimCmd.AddCommand(vimAddPkgCmd)
+	vimCmd.AddCommand(vimRemovePkgCmd)
 
 	// Here you will define your flags and configuration settings.
 
