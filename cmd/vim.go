@@ -24,7 +24,7 @@ var vimPkgCmd = &cobra.Command{
 // vimAddPkgCmd represents the command for adding vim packages
 var vimAddPkgCmd = &cobra.Command{
 	Use:   "add [pkg url]",
-	Short: "easily add vim packages",
+	Short: "easily add a vim package",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
 			cmd.Help()
@@ -55,7 +55,7 @@ var vimAddPkgCmd = &cobra.Command{
 // vimRemovePkgCmd represents the command for adding vim packages
 var vimRemovePkgCmd = &cobra.Command{
 	Use:   "rm [pkg name]",
-	Short: "easily remove vim packages",
+	Short: "easily remove a vim package",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
 			cmd.Help()
@@ -69,6 +69,44 @@ var vimRemovePkgCmd = &cobra.Command{
 		if err != nil {
 			log.Panic(err)
 		}
+		return err
+	},
+}
+
+// vimUpdatePkgCmd represents the command for adding vim packages
+var vimUpdatePkgCmd = &cobra.Command{
+	Use:   "update [pkg url]",
+	Short: "easily update a vim package",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			cmd.Help()
+			os.Exit(0)
+		}
+		pkgName := args[0]
+
+		dirPath := viper.GetString("VIM_PACKAGE_DIR") + "/" + pkgName
+		log.Print("Updating " + pkgName + " in vim packages found at " + dirPath)
+		repo, err := git.PlainOpen(dirPath)
+		if err != nil {
+			log.Panic(err)
+		}
+		worktree, err := repo.Worktree()
+		if err != nil {
+			log.Panic(err)
+		}
+		err = worktree.Pull(&git.PullOptions{RemoteName: "origin"})
+		if err != nil {
+			if strings.Contains(err.Error(), "already up-to-date") {
+				log.Print(err)
+				os.Exit(0)
+			}
+			log.Panic(err)
+		}
+		ref, err := repo.Head()
+		if err != nil {
+			log.Panic(err)
+		}
+		log.Print(ref)
 		return err
 	},
 }
@@ -90,6 +128,7 @@ func init() {
 	vimCmd.AddCommand(vimPkgCmd)
 	vimPkgCmd.AddCommand(vimAddPkgCmd)
 	vimPkgCmd.AddCommand(vimRemovePkgCmd)
+	vimPkgCmd.AddCommand(vimUpdatePkgCmd)
 
 	// Here you will define your flags and configuration settings.
 
