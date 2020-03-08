@@ -111,6 +111,36 @@ var vimUpdatePkgCmd = &cobra.Command{
 	},
 }
 
+var vimConfigCmd = &cobra.Command{
+	Use:   "config",
+	Short: "a subcommand for configuring vimrc",
+}
+
+// vimAddConfigCmd represents the command for adding vim packages
+var vimAddConfigCmd = &cobra.Command{
+	Use:   "add [configuration]",
+	Short: "easily add a vim configuration",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			cmd.Help()
+			os.Exit(0)
+		}
+		configurationText := args[0]
+		vimrcPath := viper.GetString("VIMRC_PATH")
+		log.Print("Adding " + configurationText + " to vimrc " + vimrcPath)
+
+		vimrc, err := os.OpenFile(vimrcPath, os.O_APPEND|os.O_WRONLY, 0666)
+		if err != nil {
+			log.Panic(err)
+		}
+		defer vimrc.Close()
+		if _, err = vimrc.WriteString(configurationText); err != nil {
+			log.Panic(err)
+		}
+		return err
+	},
+}
+
 func getPkgName(pkgURL string) string {
 	// pkgURL is assumed to be formatted as
 	// git@github.com:owner/repo.git
@@ -126,17 +156,9 @@ func getPkgName(pkgURL string) string {
 func init() {
 	rootCmd.AddCommand(vimCmd)
 	vimCmd.AddCommand(vimPkgCmd)
+	vimCmd.AddCommand(vimConfigCmd)
 	vimPkgCmd.AddCommand(vimAddPkgCmd)
 	vimPkgCmd.AddCommand(vimRemovePkgCmd)
 	vimPkgCmd.AddCommand(vimUpdatePkgCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// vimCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// vimCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	vimConfigCmd.AddCommand(vimAddConfigCmd)
 }
