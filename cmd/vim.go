@@ -3,6 +3,7 @@ package cmd
 import (
 	"log"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -141,6 +142,33 @@ var vimAddConfigCmd = &cobra.Command{
 	},
 }
 
+// vimEditConfigCmd represents the command for adding vim packages
+var vimEditConfigCmd = &cobra.Command{
+	Use:   "edit",
+	Short: "edit your vim configuration manually",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		vimrcPath := viper.GetString("VIMRC_PATH")
+
+		editor := os.Getenv("EDITOR")
+		if editor == "" {
+			editor = "vim" // I mean, this makes sense, right?
+		}
+
+		log.Print("Opening editor for manual changes. Using editor " + editor)
+		executable, err := exec.LookPath(editor)
+		if err != nil {
+			log.Panic(err)
+		}
+
+		editorCmd := exec.Command(executable, vimrcPath)
+		editorCmd.Stdin = os.Stdin
+		editorCmd.Stdout = os.Stdout
+		editorCmd.Stderr = os.Stderr
+
+		return editorCmd.Run()
+	},
+}
+
 func getPkgName(pkgURL string) string {
 	// pkgURL is assumed to be formatted as
 	// git@github.com:owner/repo.git
@@ -161,4 +189,5 @@ func init() {
 	vimPkgCmd.AddCommand(vimRemovePkgCmd)
 	vimPkgCmd.AddCommand(vimUpdatePkgCmd)
 	vimConfigCmd.AddCommand(vimAddConfigCmd)
+	vimConfigCmd.AddCommand(vimEditConfigCmd)
 }
