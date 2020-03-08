@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "github.com/Jefferson-Faseler/pandemic/cmd"
+import "github.com/Jefferson-Faseler/prion/cmd"
 
 func main() {
 	cmd.Execute()

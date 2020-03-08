@@ -1,4 +1,4 @@
-module github.com/Jefferson-Faseler/pandemic
+module github.com/Jefferson-Faseler/prion
 
 go 1.13
 
