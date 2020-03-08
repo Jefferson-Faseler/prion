@@ -11,21 +11,10 @@ import (
 	"gopkg.in/src-d/go-git.v4"
 )
 
-// vimCmd represents the vim subcommand
-var vimCmd = &cobra.Command{
-	Use:   "vim",
-	Short: "a subcommand for configuring vim",
-}
-
-var vimPkgCmd = &cobra.Command{
-	Use:   "pkg",
-	Short: "a subcommand for working with packages",
-}
-
-// vimAddPkgCmd represents the command for adding vim packages
-var vimAddPkgCmd = &cobra.Command{
-	Use:   "add [pkg url]",
-	Short: "easily add a vim package",
+// installPkgCmd represents the command for installing vim packages
+var installPkgCmd = &cobra.Command{
+	Use:   "install [pkg url]",
+	Short: "easily install a vim package",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
 			cmd.Help()
@@ -35,7 +24,7 @@ var vimAddPkgCmd = &cobra.Command{
 
 		pkgName := getPkgName(pkgURL)
 		dirPath := viper.GetString("VIM_PACKAGE_DIR") + "/" + pkgName
-		log.Print("Adding " + pkgURL + " to vim packages at " + dirPath)
+		log.Print("Installing " + pkgURL + " to vim packages at " + dirPath)
 		err := os.MkdirAll(dirPath, os.ModePerm)
 		if err != nil {
 			log.Panic(err)
@@ -53,8 +42,8 @@ var vimAddPkgCmd = &cobra.Command{
 	},
 }
 
-// vimRemovePkgCmd represents the command for adding vim packages
-var vimRemovePkgCmd = &cobra.Command{
+// removePkgCmd represents the command for removing vim packages
+var removePkgCmd = &cobra.Command{
 	Use:   "rm [pkg name]",
 	Short: "easily remove a vim package",
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -74,8 +63,8 @@ var vimRemovePkgCmd = &cobra.Command{
 	},
 }
 
-// vimUpdatePkgCmd represents the command for adding vim packages
-var vimUpdatePkgCmd = &cobra.Command{
+// updatePkgCmd represents the command for updating vim packages
+var updatePkgCmd = &cobra.Command{
 	Use:   "update [pkg url]",
 	Short: "easily update a vim package",
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -112,13 +101,13 @@ var vimUpdatePkgCmd = &cobra.Command{
 	},
 }
 
-var vimConfigCmd = &cobra.Command{
+var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "a subcommand for configuring vimrc",
 }
 
-// vimAddConfigCmd represents the command for adding vim packages
-var vimAddConfigCmd = &cobra.Command{
+// configAddCmd represents the command for adding vim configuration
+var configAddCmd = &cobra.Command{
 	Use:   "add [configuration]",
 	Short: "easily add a vim configuration",
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -142,8 +131,8 @@ var vimAddConfigCmd = &cobra.Command{
 	},
 }
 
-// vimEditConfigCmd represents the command for adding vim packages
-var vimEditConfigCmd = &cobra.Command{
+// configEditCmd represents the command for editing vim configuration
+var configEditCmd = &cobra.Command{
 	Use:   "edit",
 	Short: "edit your vim configuration manually",
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -182,12 +171,10 @@ func getPkgName(pkgURL string) string {
 }
 
 func init() {
-	rootCmd.AddCommand(vimCmd)
-	vimCmd.AddCommand(vimPkgCmd)
-	vimCmd.AddCommand(vimConfigCmd)
-	vimPkgCmd.AddCommand(vimAddPkgCmd)
-	vimPkgCmd.AddCommand(vimRemovePkgCmd)
-	vimPkgCmd.AddCommand(vimUpdatePkgCmd)
-	vimConfigCmd.AddCommand(vimAddConfigCmd)
-	vimConfigCmd.AddCommand(vimEditConfigCmd)
+	rootCmd.AddCommand(installPkgCmd)
+	rootCmd.AddCommand(removePkgCmd)
+	rootCmd.AddCommand(updatePkgCmd)
+	rootCmd.AddCommand(configCmd)
+	configCmd.AddCommand(configAddCmd)
+	configCmd.AddCommand(configEditCmd)
 }
