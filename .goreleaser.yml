@@ -29,7 +29,6 @@ brews:
     homepage: https://github.com/Jefferson-Faseler/prion
     dependencies:
       - git
-      - vim
     description: A vim package manager, designed foor use with pathogen
     test: |
       system "#{bin}/prion -v"
