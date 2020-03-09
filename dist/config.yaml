@@ -4,6 +4,21 @@ release:
     owner: Jefferson-Faseler
     name: prion
   name_template: '{{.Tag}}'
+brews:
+- name: prion
+  github:
+    owner: Jefferson-Faseler
+    name: homebrew-prion
+  commit_author:
+    name: goreleaserbot
+    email: goreleaser@carlosbecker.com
+  folder: Formula
+  install: bin.install "prion"
+  test: |
+    system "#{bin}/prion -v"
+  description: A vim package manager, designed foor use with pathogen
+  homepage: https://github.com/Jefferson-Faseler/prion
+  goarm: "6"
 scoop:
   name: prion
   commit_author:
