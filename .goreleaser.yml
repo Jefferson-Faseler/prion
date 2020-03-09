@@ -15,9 +15,6 @@ checksum:
   name_template: 'checksums.txt'
 snapshot:
   name_template: "{{ .Tag }}-next"
-dependencies:
-  - git
-  - vim
 changelog:
   sort: asc
   filters:
@@ -30,6 +27,9 @@ brews:
       name: homebrew-prion
     folder: Formula
     homepage: https://github.com/Jefferson-Faseler/prion
+    dependencies:
+      - git
+      - vim
     description: A vim package manager, designed foor use with pathogen
     test: |
       system "#{bin}/prion -v"
