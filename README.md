@@ -3,6 +3,13 @@
 A package manager for vim, designed for use with [pathogen](https://github.com/tpope/vim-pathogen)
 
 ### Installation
+
+#### Homebrew
+```
+brew install Jefferson-Faseler/prion/prion
+```
+
+#### Go install
 ```
 go get -u github.com/Jefferson-Faseler/prion
 cd $GOPATH/src/github.com/Jefferson-Faseler/prion
