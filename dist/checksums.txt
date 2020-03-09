@@ -1,4 +1,0 @@
-abc09e05bee3fdacf5e9125045a828fc0fc2b3c846f4046a08220f1d3d2559b6  prion_v0.1.1-next_Darwin_i386.tar.gz
-b15b585e07669e93ef6b0e7892bfcac3d2b0260654156a63644e4e7e05cd95ad  prion_v0.1.1-next_Linux_x86_64.tar.gz
-f2e8d5c5e08a660b7135fcda9f941993eecffc3852101901d2d9328a6cbcccd4  prion_v0.1.1-next_Linux_i386.tar.gz
-3c812d56c92368a27a3d435ee20cdec96bfa90a8f3e1c3b41e3b1bcb9960cc32  prion_v0.1.1-next_Darwin_x86_64.tar.gz
