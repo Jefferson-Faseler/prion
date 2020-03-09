@@ -21,3 +21,12 @@ changelog:
     exclude:
     - '^docs:'
     - '^test:'
+brews:
+  - github:
+      owner: Jefferson-Faseler
+      name: homebrew-prion
+    folder: Formula
+    homepage: https://github.com/Jefferson-Faseler/prion
+    description: A vim package manager, designed foor use with pathogen
+    test: |
+      system "#{bin}/prion -v"
