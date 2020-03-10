@@ -23,7 +23,7 @@ var installPkgCmd = &cobra.Command{
 
 		for _, pkgURL := range args {
 			pkgName := getPkgName(pkgURL)
-			dirPath := viper.GetString("VIM_BUNDLE_DIR") + "/" + pkgName
+			dirPath := bundleDir() + "/" + pkgName
 			fmt.Println("Installing " + pkgURL)
 			err := os.MkdirAll(dirPath, os.ModePerm)
 			handleError(err)
@@ -54,7 +54,7 @@ var removePkgCmd = &cobra.Command{
 		}
 
 		for _, pkgName := range args {
-			dirPath := viper.GetString("VIM_BUNDLE_DIR") + "/" + pkgName
+			dirPath := bundleDir() + "/" + pkgName
 			err := os.RemoveAll(dirPath)
 			handleError(err)
 			fmt.Println(pkgName + " removed")
@@ -72,9 +72,8 @@ var updatePkgCmd = &cobra.Command{
 			os.Exit(0)
 		}
 
-		bundleDir := viper.GetString("VIM_BUNDLE_DIR")
 		for _, pkgName := range args {
-			dirPath := bundleDir + "/" + pkgName
+			dirPath := bundleDir() + "/" + pkgName
 			fmt.Println("Updating " + pkgName)
 			repo, err := git.PlainOpen(dirPath)
 			handleError(err)
@@ -110,10 +109,9 @@ var configAddCmd = &cobra.Command{
 		}
 
 		configurationText := args[0]
-		vimrcPath := viper.GetString("VIMRC_PATH")
 		fmt.Println("Adding " + configurationText + " to vimrc")
 
-		vimrc, err := os.OpenFile(vimrcPath, os.O_APPEND|os.O_WRONLY, 0666)
+		vimrc, err := os.OpenFile(vimrcPath(), os.O_APPEND|os.O_WRONLY, 0666)
 		handleError(err)
 
 		defer vimrc.Close()
@@ -127,8 +125,6 @@ var configEditCmd = &cobra.Command{
 	Use:   "edit",
 	Short: "edit your vim configuration manually",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		vimrcPath := viper.GetString("VIMRC_PATH")
-
 		editor := os.Getenv("EDITOR")
 		if editor == "" {
 			editor = "vim" // I mean, this makes sense, right?
@@ -139,7 +135,7 @@ var configEditCmd = &cobra.Command{
 		executable, err := exec.LookPath(editor)
 		handleError(err)
 
-		editorCmd := exec.Command(executable, vimrcPath)
+		editorCmd := exec.Command(executable, vimrcPath())
 		editorCmd.Stdin = os.Stdin
 		editorCmd.Stdout = os.Stdout
 		editorCmd.Stderr = os.Stderr
@@ -165,6 +161,14 @@ func handleError(err error) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+}
+
+func bundleDir() string {
+	return viper.GetString("VIM_BUNDLE_DIR")
+}
+
+func vimrcPath() string {
+	return viper.GetString("VIMRC_PATH")
 }
 
 func init() {
