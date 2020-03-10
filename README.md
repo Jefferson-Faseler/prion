@@ -52,10 +52,17 @@ prion config edit
 
 
 ### What it does
-At it's core, prion, is simplifying the normal pathogen method of cloning into `~/.vim/bundle/` and then over time updating the packages as you go.
+At it's core, prion is simplifying the normal pathogen method of cloning into `~/.vim/bundle/` and then over time updating the packages as you go.
 
-Prion also offers an easier way to update your `.vimrc` configuration. In a normal workflow especially when you are trying something new whether it be a package, framework, or language. You are constantly opening, editing, saving, and reloading your vim editor to make and check changes. Prion cuts that cycle into two steps for most cases.
+Prion also offers an easier way to update your `.vimrc` configuration. In a normal workflow, you are constantly opening, editing, saving, and reloading your vim editor to make and check changes. Prion cuts that cycle into two steps for most cases.
 
+
+### Overriding defaults
+Prion is looking for two env variables you may have set:
+- `VIMRC_PATH` (defaults to `$HOME/.vimrc`)
+- `VIM_BUNDLE_DIR` (defaults to `$HOME/.vim/bundle`)
+
+To override defaults you can you can export the vars, in-line them, or make a `.prion.env` in your home directory.
 
 ## Contributing
 Knock yourself out
