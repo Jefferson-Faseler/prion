@@ -33,7 +33,12 @@ var installPkgCmd = &cobra.Command{
 				Depth:    1,
 				Progress: os.Stdout,
 			})
-			handleError(err)
+			if err != nil {
+				if nestedErr := os.RemoveAll(dirPath); nestedErr != nil {
+					fmt.Println(err.Error())
+				}
+				handleError(err)
+			}
 		}
 	},
 }
