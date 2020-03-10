@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -93,6 +94,31 @@ var updatePkgCmd = &cobra.Command{
 	},
 }
 
+// listPkgCmd represents the command for updating vim packages
+var listPkgCmd = &cobra.Command{
+	Use:   "ls [pkg url]",
+	Short: "list all your vim packages",
+	Run: func(cmd *cobra.Command, args []string) {
+		pkgs, err := allPackages()
+		handleError(err)
+		for _, pkgName := range pkgs {
+			fmt.Println(pkgName)
+		}
+	},
+}
+
+func allPackages() (pkgs []string, err error) {
+	dirs, err := ioutil.ReadDir(bundleDir())
+	if err != nil {
+		return pkgs, err
+	}
+
+	for _, dir := range dirs {
+		pkgs = append(pkgs, dir.Name())
+	}
+	return pkgs, err
+}
+
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "a subcommand for configuring vimrc",
@@ -175,6 +201,7 @@ func init() {
 	rootCmd.AddCommand(installPkgCmd)
 	rootCmd.AddCommand(removePkgCmd)
 	rootCmd.AddCommand(updatePkgCmd)
+	rootCmd.AddCommand(listPkgCmd)
 	rootCmd.AddCommand(configCmd)
 	configCmd.AddCommand(configAddCmd)
 	configCmd.AddCommand(configEditCmd)
