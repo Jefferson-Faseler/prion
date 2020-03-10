@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -15,30 +15,26 @@ import (
 var installPkgCmd = &cobra.Command{
 	Use:   "install [pkg url]",
 	Short: "easily install a vim package",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			cmd.Help()
 			os.Exit(0)
 		}
-		pkgURL := args[0]
 
-		pkgName := getPkgName(pkgURL)
-		dirPath := viper.GetString("VIM_PACKAGE_DIR") + "/" + pkgName
-		log.Print("Installing " + pkgURL + " to vim packages at " + dirPath)
-		err := os.MkdirAll(dirPath, os.ModePerm)
-		if err != nil {
-			log.Panic(err)
-		}
+		for _, pkgURL := range args {
+			pkgName := getPkgName(pkgURL)
+			dirPath := viper.GetString("VIM_BUNDLE_DIR") + "/" + pkgName
+			fmt.Println("Installing " + pkgURL)
+			err := os.MkdirAll(dirPath, os.ModePerm)
+			handleError(err)
 
-		_, err = git.PlainClone(dirPath, false, &git.CloneOptions{
-			URL:      pkgURL,
-			Depth:    1,
-			Progress: os.Stdout,
-		})
-		if err != nil {
-			log.Panic(err)
+			_, err = git.PlainClone(dirPath, false, &git.CloneOptions{
+				URL:      pkgURL,
+				Depth:    1,
+				Progress: os.Stdout,
+			})
+			handleError(err)
 		}
-		return err
 	},
 }
 
@@ -46,20 +42,18 @@ var installPkgCmd = &cobra.Command{
 var removePkgCmd = &cobra.Command{
 	Use:   "rm [pkg name]",
 	Short: "easily remove a vim package",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			cmd.Help()
 			os.Exit(0)
 		}
-		pkgName := args[0]
 
-		dirPath := viper.GetString("VIM_PACKAGE_DIR") + "/" + pkgName
-		log.Print("Removing " + pkgName + " from vim packages found in " + dirPath)
-		err := os.RemoveAll(dirPath)
-		if err != nil {
-			log.Panic(err)
+		for _, pkgName := range args {
+			dirPath := viper.GetString("VIM_BUNDLE_DIR") + "/" + pkgName
+			err := os.RemoveAll(dirPath)
+			handleError(err)
+			fmt.Println(pkgName + " removed")
 		}
-		return err
 	},
 }
 
@@ -67,37 +61,31 @@ var removePkgCmd = &cobra.Command{
 var updatePkgCmd = &cobra.Command{
 	Use:   "update [pkg url]",
 	Short: "easily update a vim package",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			cmd.Help()
 			os.Exit(0)
 		}
-		pkgName := args[0]
 
-		dirPath := viper.GetString("VIM_PACKAGE_DIR") + "/" + pkgName
-		log.Print("Updating " + pkgName + " in vim packages found at " + dirPath)
-		repo, err := git.PlainOpen(dirPath)
-		if err != nil {
-			log.Panic(err)
-		}
-		worktree, err := repo.Worktree()
-		if err != nil {
-			log.Panic(err)
-		}
-		err = worktree.Pull(&git.PullOptions{RemoteName: "origin"})
-		if err != nil {
-			if strings.Contains(err.Error(), "already up-to-date") {
-				log.Print(err)
-				os.Exit(0)
+		bundleDir := viper.GetString("VIM_BUNDLE_DIR")
+		for _, pkgName := range args {
+			dirPath := bundleDir + "/" + pkgName
+			fmt.Println("Updating " + pkgName)
+			repo, err := git.PlainOpen(dirPath)
+			handleError(err)
+
+			worktree, err := repo.Worktree()
+			handleError(err)
+
+			err = worktree.Pull(&git.PullOptions{RemoteName: "origin"})
+			if err != nil {
+				if strings.Contains(err.Error(), "already up-to-date") {
+					fmt.Println(err)
+				} else {
+					handleError(err)
+				}
 			}
-			log.Panic(err)
 		}
-		ref, err := repo.Head()
-		if err != nil {
-			log.Panic(err)
-		}
-		log.Print(ref)
-		return err
 	},
 }
 
@@ -110,24 +98,22 @@ var configCmd = &cobra.Command{
 var configAddCmd = &cobra.Command{
 	Use:   "add [configuration]",
 	Short: "easily add a vim configuration",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			cmd.Help()
 			os.Exit(0)
 		}
+
 		configurationText := args[0]
 		vimrcPath := viper.GetString("VIMRC_PATH")
-		log.Print("Adding " + configurationText + " to vimrc " + vimrcPath)
+		fmt.Println("Adding " + configurationText + " to vimrc")
 
 		vimrc, err := os.OpenFile(vimrcPath, os.O_APPEND|os.O_WRONLY, 0666)
-		if err != nil {
-			log.Panic(err)
-		}
+		handleError(err)
+
 		defer vimrc.Close()
-		if _, err = vimrc.WriteString(configurationText); err != nil {
-			log.Panic(err)
-		}
-		return err
+		_, err = vimrc.WriteString(configurationText)
+		handleError(err)
 	},
 }
 
@@ -143,11 +129,10 @@ var configEditCmd = &cobra.Command{
 			editor = "vim" // I mean, this makes sense, right?
 		}
 
-		log.Print("Opening editor for manual changes. Using editor " + editor)
+		fmt.Println("Opening editor for manual changes. Using editor " + editor)
+		fmt.Println("Close editor to continue")
 		executable, err := exec.LookPath(editor)
-		if err != nil {
-			log.Panic(err)
-		}
+		handleError(err)
 
 		editorCmd := exec.Command(executable, vimrcPath)
 		editorCmd.Stdin = os.Stdin
@@ -168,6 +153,13 @@ func getPkgName(pkgURL string) string {
 	gitPkgName := splitAddress[len(splitAddress)-1]
 	pkgName := strings.Split(gitPkgName, ".")[0]
 	return pkgName
+}
+
+func handleError(err error) {
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
 
 func init() {
