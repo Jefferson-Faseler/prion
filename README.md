@@ -33,7 +33,7 @@ prion update [package names]
 
 or
 ```
-prion update -all
+prion update --all
 ```
 
 #### Removing
