@@ -133,11 +133,6 @@ func allPackages() (pkgs []string, err error) {
 	return pkgs, err
 }
 
-var configCmd = &cobra.Command{
-	Use:   "config",
-	Short: "a subcommand for configuring vimrc",
-}
-
 func getPkgName(pkgURL string) string {
 	// pkgURL is assumed to be formatted as
 	// git@github.com:owner/repo.git

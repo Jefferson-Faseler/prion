@@ -9,6 +9,11 @@ import (
 	"github.com/spf13/viper"
 )
 
+var configCmd = &cobra.Command{
+	Use:   "config",
+	Short: "a subcommand for configuring vimrc",
+}
+
 // configAddCmd represents the command for adding vim configuration
 var configAddCmd = &cobra.Command{
 	Use:   "add [configuration]",
