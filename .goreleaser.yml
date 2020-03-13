@@ -24,11 +24,11 @@ changelog:
 brews:
   - github:
       owner: Jefferson-Faseler
-      name: homebrew-prion
+      name: homebrew-taps
     folder: Formula
     homepage: https://github.com/Jefferson-Faseler/prion
     dependencies:
       - git
-    description: A vim package manager, designed foor use with pathogen
+    description: A vim package manager, designed for use with pathogen
     test: |
       system "#{bin}/prion -v"
