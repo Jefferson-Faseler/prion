@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/Jefferson-Faseler/prion/internal/bundle"
@@ -27,16 +28,32 @@ var installPkgCmd = &cobra.Command{
 
 		for _, pkgURL := range args {
 			pkgName := getPkgName(pkgURL)
-			dirPath := bundleDir() + "/" + pkgName
-			fmt.Println("Installing " + pkgURL)
-			err := os.MkdirAll(dirPath, os.ModePerm)
-			handleError(err)
+			dirPath := filepath.Join(bundleDir(), pkgName)
+			_, err := os.Stat(dirPath) // Check if the directory already exists
 
-			err = bundle.Clone(pkgURL, dirPath)
-			if err != nil {
-				if nestedErr := os.RemoveAll(dirPath); nestedErr != nil {
+			if err != nil && os.IsNotExist(err) { // If it doesn't exist, continue
+				tmpDirPath := filepath.Join(os.TempDir(), pkgName)
+				err = os.MkdirAll(tmpDirPath, os.ModePerm)
+				handleError(err)
+
+				fmt.Println("Installing " + pkgURL)
+				err = bundle.Clone(pkgURL, tmpDirPath)
+				if err != nil {
 					fmt.Println(err.Error())
+					rmErr := os.RemoveAll(tmpDirPath)
+					if rmErr != nil {
+						handleError(rmErr)
+					}
+					continue
+				} else {
+					err = os.Rename(tmpDirPath, dirPath)
+					handleError(err)
 				}
+			} else {
+				fmt.Println(pkgName + ` is already installed
+To reinstall remove the package first and then install.
+Or to simply update run:
+prion update ` + pkgName)
 				handleError(err)
 			}
 		}
@@ -54,7 +71,7 @@ var removePkgCmd = &cobra.Command{
 		}
 
 		for _, pkgName := range args {
-			dirPath := bundleDir() + "/" + pkgName
+			dirPath := filepath.Join(bundleDir(), pkgName)
 			err := os.RemoveAll(dirPath)
 			handleError(err)
 			fmt.Println(pkgName + " removed")
@@ -82,7 +99,7 @@ var updatePkgCmd = &cobra.Command{
 		}
 
 		for _, pkgName := range pkgs {
-			dirPath := bundleDir() + "/" + pkgName
+			dirPath := filepath.Join(bundleDir(), pkgName)
 			fmt.Println("Updating " + pkgName)
 
 			err = bundle.Pull(dirPath)
