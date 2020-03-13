@@ -62,8 +62,9 @@ prion update ` + pkgName)
 
 // removePkgCmd represents the command for removing vim packages
 var removePkgCmd = &cobra.Command{
-	Use:   "rm [pkg name]",
-	Short: "easily remove a vim package",
+	Use:     "rm [pkg name]",
+	Aliases: []string{"remove"},
+	Short:   "easily remove a vim package",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			cmd.Help()
@@ -116,8 +117,9 @@ var updatePkgCmd = &cobra.Command{
 
 // listPkgCmd represents the command for updating vim packages
 var listPkgCmd = &cobra.Command{
-	Use:   "ls [pkg url]",
-	Short: "list all your vim packages",
+	Use:     "ls [pkg url]",
+	Aliases: []string{"list"},
+	Short:   "list all your vim packages",
 	Run: func(cmd *cobra.Command, args []string) {
 		pkgs, err := bundle.Packages()
 		handleError(err)
