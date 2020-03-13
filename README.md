@@ -6,7 +6,7 @@ A package manager for vim, designed for use with [pathogen](https://github.com/t
 
 #### Homebrew
 ```
-brew install Jefferson-Faseler/prion/prion
+brew install Jefferson-Faseler/taps/prion
 ```
 
 #### Go install
@@ -23,17 +23,27 @@ Prion is designed to work like any other package manager from the cli
 This will work for either https or ssh remote urls
 
 ```
-prion install [repo-url]
+prion install [repo-urls]
 ```
 
 #### Updating
 ```
-prion update [package name]
+prion update [package names]
+```
+
+or
+```
+prion update -all
 ```
 
 #### Removing
 ```
-prion rm [package name]
+prion rm [package names]
+```
+
+#### Listing
+```
+prion ls
 ```
 
 #### Editing .vimrc
