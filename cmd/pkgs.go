@@ -2,13 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
+	"prion/internal/bundle"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gopkg.in/src-d/go-git.v4"
 )
 
 var (
@@ -32,11 +32,7 @@ var installPkgCmd = &cobra.Command{
 			err := os.MkdirAll(dirPath, os.ModePerm)
 			handleError(err)
 
-			_, err = git.PlainClone(dirPath, false, &git.CloneOptions{
-				URL:      pkgURL,
-				Depth:    1,
-				Progress: os.Stdout,
-			})
+			err = bundle.Clone(pkgURL, dirPath)
 			if err != nil {
 				if nestedErr := os.RemoveAll(dirPath); nestedErr != nil {
 					fmt.Println(err.Error())
@@ -72,12 +68,13 @@ var updatePkgCmd = &cobra.Command{
 	Short: "easily update a vim package",
 	Run: func(cmd *cobra.Command, args []string) {
 		var pkgs []string
+		var err error
 
 		if len(args) == 0 && all == false {
 			cmd.Help()
 			os.Exit(0)
 		} else if all == true {
-			_pkgs, err := allPackages()
+			_pkgs, err := bundle.Packages()
 			pkgs = _pkgs
 			handleError(err)
 		} else {
@@ -87,16 +84,8 @@ var updatePkgCmd = &cobra.Command{
 		for _, pkgName := range pkgs {
 			dirPath := bundleDir() + "/" + pkgName
 			fmt.Println("Updating " + pkgName)
-			repo, err := git.PlainOpen(dirPath)
-			handleError(err)
 
-			worktree, err := repo.Worktree()
-			handleError(err)
-
-			err = worktree.Pull(&git.PullOptions{
-				RemoteName: "origin",
-				Progress:   os.Stdout,
-			})
+			err = bundle.Pull(dirPath)
 			if err != nil {
 				if strings.Contains(err.Error(), "already up-to-date") {
 					fmt.Println(err)
@@ -113,24 +102,12 @@ var listPkgCmd = &cobra.Command{
 	Use:   "ls [pkg url]",
 	Short: "list all your vim packages",
 	Run: func(cmd *cobra.Command, args []string) {
-		pkgs, err := allPackages()
+		pkgs, err := bundle.Packages()
 		handleError(err)
 		for _, pkgName := range pkgs {
 			fmt.Println(pkgName)
 		}
 	},
-}
-
-func allPackages() (pkgs []string, err error) {
-	dirs, err := ioutil.ReadDir(bundleDir())
-	if err != nil {
-		return pkgs, err
-	}
-
-	for _, dir := range dirs {
-		pkgs = append(pkgs, dir.Name())
-	}
-	return pkgs, err
 }
 
 func getPkgName(pkgURL string) string {
