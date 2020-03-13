@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"prion/internal/bundle"
+	"github.com/Jefferson-Faseler/prion/internal/bundle"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
