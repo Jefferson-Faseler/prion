@@ -73,9 +73,16 @@ var removePkgCmd = &cobra.Command{
 
 		for _, pkgName := range args {
 			dirPath := filepath.Join(bundleDir(), pkgName)
-			err := os.RemoveAll(dirPath)
-			handleError(err)
-			fmt.Println(pkgName + " removed")
+			_, err := os.Stat(dirPath) // Check if the directory already exists
+
+			if err != nil && os.IsNotExist(err) { // If it doesn't exist, error
+				fmt.Println("No package name " + pkgName)
+				handleError(err)
+			} else {
+				err := os.RemoveAll(dirPath)
+				handleError(err)
+				fmt.Println(pkgName + " removed")
+			}
 		}
 	},
 }
