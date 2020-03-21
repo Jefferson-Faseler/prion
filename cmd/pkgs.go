@@ -29,11 +29,16 @@ var installPkgCmd = &cobra.Command{
 		for _, pkgURL := range args {
 			pkgName := getPkgName(pkgURL)
 			dirPath := filepath.Join(bundleDir(), pkgName)
-			_, err := os.Stat(dirPath) // Check if the directory already exists
 
-			if err != nil && os.IsNotExist(err) { // If it doesn't exist, continue
+			if isDirPresent(dirPath) {
+				fmt.Println(pkgName + ` is already installed
+To reinstall remove the package first and then install.
+Or to simply update run:
+prion update ` + pkgName)
+				os.Exit(1)
+			} else {
 				tmpDirPath := filepath.Join(os.TempDir(), pkgName)
-				err = os.MkdirAll(tmpDirPath, os.ModePerm)
+				err := os.MkdirAll(tmpDirPath, os.ModePerm)
 				handleError(err)
 
 				fmt.Println("Installing " + pkgURL)
@@ -49,12 +54,6 @@ var installPkgCmd = &cobra.Command{
 					err = os.Rename(tmpDirPath, dirPath)
 					handleError(err)
 				}
-			} else {
-				fmt.Println(pkgName + ` is already installed
-To reinstall remove the package first and then install.
-Or to simply update run:
-prion update ` + pkgName)
-				handleError(err)
 			}
 		}
 	},
@@ -73,9 +72,15 @@ var removePkgCmd = &cobra.Command{
 
 		for _, pkgName := range args {
 			dirPath := filepath.Join(bundleDir(), pkgName)
-			err := os.RemoveAll(dirPath)
-			handleError(err)
-			fmt.Println(pkgName + " removed")
+
+			if isDirMissing(dirPath) {
+				fmt.Println("No package named " + pkgName)
+				os.Exit(1)
+			} else {
+				err := os.RemoveAll(dirPath)
+				handleError(err)
+				fmt.Println(pkgName + " removed")
+			}
 		}
 	},
 }
@@ -101,8 +106,8 @@ var updatePkgCmd = &cobra.Command{
 
 		for _, pkgName := range pkgs {
 			dirPath := filepath.Join(bundleDir(), pkgName)
-			fmt.Println("Updating " + pkgName)
 
+			// will return an error if the dir is missing
 			err = bundle.Pull(dirPath)
 			if err != nil {
 				if strings.Contains(err.Error(), "already up-to-date") {
@@ -110,6 +115,8 @@ var updatePkgCmd = &cobra.Command{
 				} else {
 					handleError(err)
 				}
+			} else {
+				fmt.Println("Updating " + pkgName)
 			}
 		}
 	},
@@ -143,6 +150,20 @@ func getPkgName(pkgURL string) string {
 
 func bundleDir() string {
 	return viper.GetString("VIM_BUNDLE_DIR")
+}
+
+func isDirPresent(dirPath string) bool {
+	_, pathErr := os.Stat(dirPath)
+
+	// type *PathError is able to confirm why the error occured
+	return !os.IsNotExist(pathErr)
+}
+
+func isDirMissing(dirPath string) bool {
+	_, pathErr := os.Stat(dirPath)
+
+	// type *PathError is able to confirm why the error occured
+	return os.IsNotExist(pathErr)
 }
 
 func init() {
