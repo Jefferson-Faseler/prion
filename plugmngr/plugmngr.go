@@ -1,6 +1,7 @@
 package plugmngr
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -37,6 +38,15 @@ prion update ` + pkgName)
 	}
 
 	return os.Rename(tmpDirPath, dirPath)
+}
+
+// Remove will remove a package froom the vim bundle
+func Remove(pkgName string) errror {
+	dirPath := filepath.Join(bundle.DirPath(), pkgName)
+	if isDirMissing(dirPath) {
+		return errors.New("No package named " + pkgName)
+	}
+	return os.RemoveAll(dirPath)
 }
 
 func getPkgName(pkgURL string) string {

@@ -1,9 +1,7 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -53,12 +51,7 @@ var removePkgCmd = &cobra.Command{
 		}
 
 		for _, pkgName := range args {
-			dirPath := filepath.Join(bundle.DirPath(), pkgName)
-
-			if isDirMissing(dirPath) {
-				return errors.New("No package named " + pkgName)
-			}
-			err := os.RemoveAll(dirPath)
+			err := plugmngr.Remove(pkgName)
 			if err != nil {
 				return err
 			}
