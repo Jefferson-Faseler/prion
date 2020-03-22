@@ -9,7 +9,7 @@ import (
 	"github.com/Jefferson-Faseler/prion/internal/bundle"
 )
 
-// Install is the entrypoint for installing a git repository to the vim bundle
+// Install will clone the package URL to a temporary directory and move the contents to the vim bundle if everything was successful, otherwise it will attempt to delete the temp directory and return any errors
 func Install(pkgURL string) error {
 	pkgName := getPkgName(pkgURL)
 	dirPath := filepath.Join(bundle.DirPath(), pkgName)
@@ -47,7 +47,7 @@ func Remove(pkgName string) error {
 	return os.RemoveAll(dirPath)
 }
 
-// Update updates a vim package, returns if there were changes and errors
+// Update updates a vim package, returns a boolean denoting if the package was already up-to-date and the error if any occured
 func Update(pkgName string) (bool, error) {
 	dirPath := filepath.Join(bundle.DirPath(), pkgName)
 
