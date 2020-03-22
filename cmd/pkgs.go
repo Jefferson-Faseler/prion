@@ -10,7 +10,6 @@ import (
 	"github.com/Jefferson-Faseler/prion/internal/bundle"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var (
@@ -31,7 +30,7 @@ var installPkgCmd = &cobra.Command{
 
 		for _, pkgURL := range args {
 			pkgName := getPkgName(pkgURL)
-			dirPath := filepath.Join(bundleDir(), pkgName)
+			dirPath := filepath.Join(bundle.DirPath(), pkgName)
 
 			if isDirPresent(dirPath) {
 				return fmt.Errorf(pkgName + ` is already installed
@@ -75,7 +74,7 @@ var removePkgCmd = &cobra.Command{
 		}
 
 		for _, pkgName := range args {
-			dirPath := filepath.Join(bundleDir(), pkgName)
+			dirPath := filepath.Join(bundle.DirPath(), pkgName)
 
 			if isDirMissing(dirPath) {
 				return errors.New("No package named " + pkgName)
@@ -115,7 +114,7 @@ var updatePkgCmd = &cobra.Command{
 		}
 
 		for _, pkgName := range pkgs {
-			dirPath := filepath.Join(bundleDir(), pkgName)
+			dirPath := filepath.Join(bundle.DirPath(), pkgName)
 
 			// will return an error if the dir is missing
 			err = bundle.Pull(dirPath)
@@ -163,10 +162,6 @@ func getPkgName(pkgURL string) string {
 	gitPkgName := splitAddress[len(splitAddress)-1]
 	pkgName := strings.Split(gitPkgName, ".")[0]
 	return pkgName
-}
-
-func bundleDir() string {
-	return viper.GetString("VIM_BUNDLE_DIR")
 }
 
 func isDirPresent(dirPath string) bool {

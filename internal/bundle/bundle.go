@@ -8,6 +8,11 @@ import (
 	"gopkg.in/src-d/go-git.v4"
 )
 
+// DirPath is the location of the bundle directory
+func DirPath() string {
+	return viper.GetString("VIM_BUNDLE_DIR")
+}
+
 // Clone will download a copy of the git repository to the directory specified
 func Clone(pkgURL, dirPath string) error {
 	_, err := git.PlainClone(dirPath, false, &git.CloneOptions{
