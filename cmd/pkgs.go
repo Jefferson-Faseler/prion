@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Jefferson-Faseler/prion/internal/bundle"
-	"github.com/Jefferson-Faseler/prion/plugmngr"
+	"github.com/Jefferson-Faseler/prion/pkgmngr"
 
 	"github.com/spf13/cobra"
 )
@@ -26,7 +26,7 @@ var installPkgCmd = &cobra.Command{
 		}
 
 		for _, pkgURL := range args {
-			err := plugmngr.Install(pkgURL)
+			err := pkgmngr.Install(pkgURL)
 			if err != nil {
 				return err
 			}
@@ -49,7 +49,7 @@ var removePkgCmd = &cobra.Command{
 		}
 
 		for _, pkgName := range args {
-			err := plugmngr.Remove(pkgName)
+			err := pkgmngr.Remove(pkgName)
 			if err != nil {
 				return err
 			}
@@ -83,7 +83,7 @@ var updatePkgCmd = &cobra.Command{
 		}
 
 		for _, pkgName := range pkgs {
-			wasUpToDate, err := plugmngr.Update(pkgName)
+			wasUpToDate, err := pkgmngr.Update(pkgName)
 			if err != nil {
 				return err
 			}

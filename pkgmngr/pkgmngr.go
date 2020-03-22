@@ -1,4 +1,4 @@
-package plugmngr
+package pkgmngr
 
 import (
 	"errors"
