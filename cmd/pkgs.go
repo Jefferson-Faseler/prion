@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/Jefferson-Faseler/prion/internal/bundle"
+	"github.com/Jefferson-Faseler/prion/plugmngr"
 
 	"github.com/spf13/cobra"
 )
@@ -29,32 +30,10 @@ var installPkgCmd = &cobra.Command{
 		}
 
 		for _, pkgURL := range args {
-			pkgName := getPkgName(pkgURL)
-			dirPath := filepath.Join(bundle.DirPath(), pkgName)
-
-			if isDirPresent(dirPath) {
-				return fmt.Errorf(pkgName + ` is already installed
-To reinstall remove the package first and then install.
-Or to simply update run:
-prion update ` + pkgName)
-			}
-			tmpDirPath := filepath.Join(os.TempDir(), pkgName)
-			err := os.MkdirAll(tmpDirPath, os.ModePerm)
+			err := plugmngr.Install(pkgURL)
 			if err != nil {
 				return err
 			}
-
-			fmt.Println("Installing " + pkgURL)
-			err = bundle.Clone(pkgURL, tmpDirPath)
-			if err != nil {
-				rmErr := os.RemoveAll(tmpDirPath)
-				if rmErr != nil {
-					return rmErr
-				}
-				return err
-			}
-			err = os.Rename(tmpDirPath, dirPath)
-			return err
 		}
 		return nil
 	},
@@ -150,32 +129,6 @@ var listPkgCmd = &cobra.Command{
 		}
 		return nil
 	},
-}
-
-func getPkgName(pkgURL string) string {
-	// pkgURL is assumed to be formatted as
-	// git@github.com:owner/repo.git
-	// or
-	// https://github.com/owner/repo.git
-
-	splitAddress := strings.Split(pkgURL, "/")
-	gitPkgName := splitAddress[len(splitAddress)-1]
-	pkgName := strings.Split(gitPkgName, ".")[0]
-	return pkgName
-}
-
-func isDirPresent(dirPath string) bool {
-	_, pathErr := os.Stat(dirPath)
-
-	// type *PathError is able to confirm why the error occured
-	return !os.IsNotExist(pathErr)
-}
-
-func isDirMissing(dirPath string) bool {
-	_, pathErr := os.Stat(dirPath)
-
-	// type *PathError is able to confirm why the error occured
-	return os.IsNotExist(pathErr)
 }
 
 func init() {
