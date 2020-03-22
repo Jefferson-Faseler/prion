@@ -2,7 +2,6 @@ package pkgmngr
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,7 +15,7 @@ func Install(pkgURL string) error {
 	dirPath := filepath.Join(bundle.DirPath(), pkgName)
 
 	if isDirPresent(dirPath) {
-		return fmt.Errorf(pkgName + ` is already installed
+		return errors.New(pkgName + ` is already installed
 To reinstall remove the package first and then install.
 Or to simply update run:
 prion update ` + pkgName)
@@ -27,7 +26,6 @@ prion update ` + pkgName)
 		return err
 	}
 
-	fmt.Println("Installing " + pkgURL)
 	err = bundle.Clone(pkgURL, tmpDirPath)
 	if err != nil {
 		rmErr := os.RemoveAll(tmpDirPath)

@@ -26,6 +26,7 @@ var installPkgCmd = &cobra.Command{
 		}
 
 		for _, pkgURL := range args {
+			fmt.Println("Installing " + pkgURL)
 			err := pkgmngr.Install(pkgURL)
 			if err != nil {
 				return err
