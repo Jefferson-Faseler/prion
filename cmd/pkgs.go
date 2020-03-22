@@ -1,16 +1,12 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/Jefferson-Faseler/prion/internal/bundle"
+	"github.com/Jefferson-Faseler/prion/pkgmngr"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var (
@@ -30,32 +26,11 @@ var installPkgCmd = &cobra.Command{
 		}
 
 		for _, pkgURL := range args {
-			pkgName := getPkgName(pkgURL)
-			dirPath := filepath.Join(bundleDir(), pkgName)
-
-			if isDirPresent(dirPath) {
-				return fmt.Errorf(pkgName + ` is already installed
-To reinstall remove the package first and then install.
-Or to simply update run:
-prion update ` + pkgName)
-			}
-			tmpDirPath := filepath.Join(os.TempDir(), pkgName)
-			err := os.MkdirAll(tmpDirPath, os.ModePerm)
-			if err != nil {
-				return err
-			}
-
 			fmt.Println("Installing " + pkgURL)
-			err = bundle.Clone(pkgURL, tmpDirPath)
+			err := pkgmngr.Install(pkgURL)
 			if err != nil {
-				rmErr := os.RemoveAll(tmpDirPath)
-				if rmErr != nil {
-					return rmErr
-				}
 				return err
 			}
-			err = os.Rename(tmpDirPath, dirPath)
-			return err
 		}
 		return nil
 	},
@@ -75,12 +50,7 @@ var removePkgCmd = &cobra.Command{
 		}
 
 		for _, pkgName := range args {
-			dirPath := filepath.Join(bundleDir(), pkgName)
-
-			if isDirMissing(dirPath) {
-				return errors.New("No package named " + pkgName)
-			}
-			err := os.RemoveAll(dirPath)
+			err := pkgmngr.Remove(pkgName)
 			if err != nil {
 				return err
 			}
@@ -105,29 +75,24 @@ var updatePkgCmd = &cobra.Command{
 			cmd.Help()
 			return nil
 		} else if all == true {
-			_pkgs, err := bundle.Packages()
+			pkgs, err = bundle.Packages()
 			if err != nil {
 				return err
 			}
-			pkgs = _pkgs
 		} else {
 			pkgs = args
 		}
 
 		for _, pkgName := range pkgs {
-			dirPath := filepath.Join(bundleDir(), pkgName)
-
-			// will return an error if the dir is missing
-			err = bundle.Pull(dirPath)
+			wasUpToDate, err := pkgmngr.Update(pkgName)
 			if err != nil {
-				if strings.Contains(err.Error(), "already up-to-date") {
-					fmt.Println(err)
-				} else {
-					return err
-				}
-			} else {
-				fmt.Println("Updating " + pkgName)
+				return err
 			}
+			if wasUpToDate {
+				fmt.Println(pkgName + " already up-to-date")
+				continue
+			}
+			fmt.Println("Updating " + pkgName)
 		}
 		return nil
 	},
@@ -151,36 +116,6 @@ var listPkgCmd = &cobra.Command{
 		}
 		return nil
 	},
-}
-
-func getPkgName(pkgURL string) string {
-	// pkgURL is assumed to be formatted as
-	// git@github.com:owner/repo.git
-	// or
-	// https://github.com/owner/repo.git
-
-	splitAddress := strings.Split(pkgURL, "/")
-	gitPkgName := splitAddress[len(splitAddress)-1]
-	pkgName := strings.Split(gitPkgName, ".")[0]
-	return pkgName
-}
-
-func bundleDir() string {
-	return viper.GetString("VIM_BUNDLE_DIR")
-}
-
-func isDirPresent(dirPath string) bool {
-	_, pathErr := os.Stat(dirPath)
-
-	// type *PathError is able to confirm why the error occured
-	return !os.IsNotExist(pathErr)
-}
-
-func isDirMissing(dirPath string) bool {
-	_, pathErr := os.Stat(dirPath)
-
-	// type *PathError is able to confirm why the error occured
-	return os.IsNotExist(pathErr)
 }
 
 func init() {
