@@ -69,16 +69,16 @@ var updatePkgCmd = &cobra.Command{
 	SilenceErrors: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var pkgs []string
+		var err error
 
 		if len(args) == 0 && all == false {
 			cmd.Help()
 			return nil
 		} else if all == true {
-			_pkgs, err := bundle.Packages()
+			pkgs, err = bundle.Packages()
 			if err != nil {
 				return err
 			}
-			pkgs = _pkgs
 		} else {
 			pkgs = args
 		}
