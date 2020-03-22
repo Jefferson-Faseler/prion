@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"path/filepath"
-	"strings"
 
 	"github.com/Jefferson-Faseler/prion/internal/bundle"
 	"github.com/Jefferson-Faseler/prion/plugmngr"
@@ -70,7 +68,6 @@ var updatePkgCmd = &cobra.Command{
 	SilenceErrors: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var pkgs []string
-		var err error
 
 		if len(args) == 0 && all == false {
 			cmd.Help()
@@ -86,19 +83,15 @@ var updatePkgCmd = &cobra.Command{
 		}
 
 		for _, pkgName := range pkgs {
-			dirPath := filepath.Join(bundle.DirPath(), pkgName)
-
-			// will return an error if the dir is missing
-			err = bundle.Pull(dirPath)
+			wasUpToDate, err := plugmngr.Update(pkgName)
 			if err != nil {
-				if strings.Contains(err.Error(), "already up-to-date") {
-					fmt.Println(err)
-				} else {
-					return err
-				}
-			} else {
-				fmt.Println("Updating " + pkgName)
+				return err
 			}
+			if wasUpToDate {
+				fmt.Println(pkgName + " already up-to-date")
+				continue
+			}
+			fmt.Println("Updating " + pkgName)
 		}
 		return nil
 	},

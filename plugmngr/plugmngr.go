@@ -41,12 +41,26 @@ prion update ` + pkgName)
 }
 
 // Remove will remove a package froom the vim bundle
-func Remove(pkgName string) errror {
+func Remove(pkgName string) error {
 	dirPath := filepath.Join(bundle.DirPath(), pkgName)
 	if isDirMissing(dirPath) {
 		return errors.New("No package named " + pkgName)
 	}
 	return os.RemoveAll(dirPath)
+}
+
+// Update updates a vim package, returns if there were changes and errors
+func Update(pkgName string) (bool, error) {
+	dirPath := filepath.Join(bundle.DirPath(), pkgName)
+
+	err := bundle.Pull(dirPath)
+	if err != nil {
+		if strings.Contains(err.Error(), "already up-to-date") {
+			return true, nil
+		}
+		return false, err
+	}
+	return false, nil
 }
 
 func getPkgName(pkgURL string) string {
