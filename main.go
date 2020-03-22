@@ -15,8 +15,16 @@ limitations under the License.
 */
 package main
 
-import "github.com/Jefferson-Faseler/prion/cmd"
+import (
+	"fmt"
+	"os"
+
+	"github.com/Jefferson-Faseler/prion/cmd"
+)
 
 func main() {
-	cmd.Execute()
+	if err := cmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }

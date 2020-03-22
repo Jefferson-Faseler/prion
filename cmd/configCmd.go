@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/Jefferson-Faseler/prion/internal/vimconfig"
 	"github.com/spf13/cobra"
@@ -15,34 +14,38 @@ var configCmd = &cobra.Command{
 
 // configAddCmd represents the command for adding vim configuration
 var configAddCmd = &cobra.Command{
-	Use:   "add [configuration]",
-	Short: "easily add a vim configuration",
-	Run: func(cmd *cobra.Command, args []string) {
+	Use:           "add [configuration]",
+	Short:         "easily add a vim configuration",
+	SilenceUsage:  true,
+	SilenceErrors: true,
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
 			cmd.Help()
-			os.Exit(0)
+			return nil
 		}
 
 		configurationText := args[0]
 		fmt.Println("Adding " + configurationText + " to vimrc")
 
 		vimrc, err := vimconfig.PrepareForWrite()
-		handleError(err)
+		if err != nil {
+			return err
+		}
 
 		defer vimrc.Close()
-		err = vimrc.Write(configurationText)
-		handleError(err)
+		return vimrc.Write(configurationText)
 	},
 }
 
 // configEditCmd represents the command for editing vim configuration
 var configEditCmd = &cobra.Command{
-	Use:   "edit",
-	Short: "edit your vim configuration manually",
-	Run: func(cmd *cobra.Command, args []string) {
+	Use:           "edit",
+	Short:         "edit your vim configuration manually",
+	SilenceUsage:  true,
+	SilenceErrors: true,
+	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Println("Opening editor for changes.")
-		err := vimconfig.EditVimRC()
-		handleError(err)
+		return vimconfig.EditVimRC()
 	},
 }
 
