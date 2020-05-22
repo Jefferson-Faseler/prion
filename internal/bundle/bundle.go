@@ -17,7 +17,6 @@ func DirPath() string {
 func Clone(pkgURL, dirPath string) error {
 	_, err := git.PlainClone(dirPath, false, &git.CloneOptions{
 		URL:      pkgURL,
-		Depth:    1,
 		Progress: os.Stdout,
 	})
 	return err
