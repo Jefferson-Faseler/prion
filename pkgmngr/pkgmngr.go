@@ -69,7 +69,7 @@ func getPkgName(pkgURL string) string {
 
 	splitAddress := strings.Split(pkgURL, "/")
 	gitPkgName := splitAddress[len(splitAddress)-1]
-	pkgName := strings.Split(gitPkgName, ".")[0]
+	pkgName := strings.TrimRight(gitPkgName, ".git")
 	return pkgName
 }
 
