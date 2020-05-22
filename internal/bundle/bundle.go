@@ -4,8 +4,8 @@ import (
 	"io/ioutil"
 	"os"
 
+	git "github.com/go-git/go-git/v5"
 	"github.com/spf13/viper"
-	"gopkg.in/src-d/go-git.v4"
 )
 
 // DirPath is the location of the bundle directory
