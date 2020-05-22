@@ -4,8 +4,8 @@ import (
 	"io/ioutil"
 	"os"
 
+	git "github.com/go-git/go-git/v5"
 	"github.com/spf13/viper"
-	"gopkg.in/src-d/go-git.v4"
 )
 
 // DirPath is the location of the bundle directory
@@ -17,7 +17,6 @@ func DirPath() string {
 func Clone(pkgURL, dirPath string) error {
 	_, err := git.PlainClone(dirPath, false, &git.CloneOptions{
 		URL:      pkgURL,
-		Depth:    1,
 		Progress: os.Stdout,
 	})
 	return err

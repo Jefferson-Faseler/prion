@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/Jefferson-Faseler/prion/internal/bundle"
 	"github.com/Jefferson-Faseler/prion/pkgmngr"
@@ -84,15 +85,19 @@ var updatePkgCmd = &cobra.Command{
 		}
 
 		for _, pkgName := range pkgs {
+			fmt.Println("Updating " + pkgName)
 			wasUpToDate, err := pkgmngr.Update(pkgName)
 			if err != nil {
+				if strings.Contains(err.Error(), "object not found") {
+					fmt.Println(err.Error())
+					continue
+				}
 				return err
 			}
 			if wasUpToDate {
-				fmt.Println(pkgName + " already up-to-date")
+				fmt.Println("already up-to-date")
 				continue
 			}
-			fmt.Println("Updating " + pkgName)
 		}
 		return nil
 	},

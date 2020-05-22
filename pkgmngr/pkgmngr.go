@@ -1,7 +1,9 @@
 package pkgmngr
 
 import (
+	"bufio"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,14 +13,22 @@ import (
 
 // Install will clone the package URL to a temporary directory and move the contents to the vim bundle if everything was successful, otherwise it will attempt to delete the temp directory and return any errors
 func Install(pkgURL string) error {
+	var reinstall bool
 	pkgName := getPkgName(pkgURL)
 	dirPath := filepath.Join(bundle.DirPath(), pkgName)
 
 	if isDirPresent(dirPath) {
-		return errors.New(pkgName + ` is already installed
-To reinstall remove the package first and then install.
-Or to simply update run:
-prion update ` + pkgName)
+		fmt.Printf(`%s is already installed, would you like to reinstall it? Enter 'y' to reinstall or any other key to cancel.
+`, pkgName)
+		reader := bufio.NewReader(os.Stdin)
+		userInput, err := reader.ReadString('\n')
+		if err != nil {
+			return err
+		}
+
+		if reinstall = strings.HasPrefix(userInput, "y"); reinstall != true {
+			return nil
+		}
 	}
 	tmpDirPath := filepath.Join(os.TempDir(), pkgName)
 	err := os.MkdirAll(tmpDirPath, os.ModePerm)
@@ -35,6 +45,12 @@ prion update ` + pkgName)
 		return err
 	}
 
+	if reinstall {
+		err = Remove(pkgName)
+		if err != nil {
+			return err
+		}
+	}
 	return os.Rename(tmpDirPath, dirPath)
 }
 
@@ -55,6 +71,11 @@ func Update(pkgName string) (bool, error) {
 	if err != nil {
 		if strings.Contains(err.Error(), "already up-to-date") {
 			return true, nil
+		}
+		if strings.Contains(err.Error(), "object not found") {
+			fmt.Println(pkgName + ` is having troubles updating.
+This can happen when the package was shallow installed, and needs repairing.
+Try reinstalling the package with the url to see if this fixes the issue.`)
 		}
 		return false, err
 	}
