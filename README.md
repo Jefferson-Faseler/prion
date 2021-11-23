@@ -36,6 +36,17 @@ or
 prion update --all
 ```
 
+#### Reinstalling
+```
+prion reinstall [package names]
+```
+
+or
+```
+prion install [repo-urls]
+# and confirm in prompt
+```
+
 #### Removing
 ```
 prion rm [package names]
