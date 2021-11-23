@@ -22,6 +22,22 @@ func Clone(pkgURL, dirPath string) error {
 	return err
 }
 
+// RemoteURL returns the fetch URL. Always assumes remote name is 'origin'
+func RemoteURL(dirPath string) (string, error) {
+	repo, err := git.PlainOpen(dirPath)
+	if err != nil {
+		return "", err
+	}
+
+	// always assume origin
+	remote, err := repo.Remote("origin")
+	if err != nil {
+		return "", err
+	}
+
+	return remote.Config().URLs[0], nil
+}
+
 // Pull the latest changes from the remote repository of the directory given
 func Pull(dirPath string) error {
 	repo, err := git.PlainOpen(dirPath)

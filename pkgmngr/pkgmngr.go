@@ -30,12 +30,18 @@ func Install(pkgURL string) error {
 			return nil
 		}
 	}
+	return install(pkgURL, reinstall)
+}
+
+func install(pkgURL string, reinstall bool) error {
+	pkgName := getPkgName(pkgURL)
+	dirPath := filepath.Join(bundle.DirPath(), pkgName)
+
 	tmpDirPath := filepath.Join(os.TempDir(), pkgName)
 	err := os.MkdirAll(tmpDirPath, os.ModePerm)
 	if err != nil {
 		return err
 	}
-
 	err = bundle.Clone(pkgURL, tmpDirPath)
 	if err != nil {
 		rmErr := os.RemoveAll(tmpDirPath)
@@ -52,6 +58,18 @@ func Install(pkgURL string) error {
 		}
 	}
 	return os.Rename(tmpDirPath, dirPath)
+}
+
+// Reinstall will re-clone a package in place
+func Reinstall(pkgName string) error {
+	dirPath := filepath.Join(bundle.DirPath(), pkgName)
+
+	remoteURL, err := bundle.RemoteURL(dirPath)
+	if err != nil {
+		return err
+	}
+
+	return install(remoteURL, true)
 }
 
 // Remove will remove a package froom the vim bundle
@@ -73,14 +91,20 @@ func Update(pkgName string) (bool, error) {
 			return true, nil
 		}
 		if strings.Contains(err.Error(), "object not found") {
-			fmt.Println(pkgName + ` is having troubles updating.
+			fmt.Println(fmt.Sprintf(`%s is having troubles updating.
 This can happen when the package was shallow installed, and needs repairing.
-Try reinstalling the package with the url to see if this fixes the issue.`)
+Try reinstalling the package with the url to see if this fixes the issue.
+
+To reinstall simply run:
+prion reinstall %s
+
+`, pkgName, pkgName))
 		}
 		if strings.Contains(err.Error(), "ssh: handshake failed: knownhosts: key mismatch") {
 			userHomeDir, err := os.UserHomeDir()
 			if err != nil {
-				fmt.Errorf(err.Error())
+				fmt.Println("Could not determine user's home directory")
+				return false, err
 			}
 			fmt.Println(fmt.Sprintf(`%s cannot connect to its remote host over ssh.
 If you have not set up ssh connections with your git server you will need to
