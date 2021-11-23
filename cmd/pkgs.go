@@ -37,6 +37,30 @@ var installPkgCmd = &cobra.Command{
 	},
 }
 
+// ReinstallPkgCmd represents the command for installing vim packages
+var reinstallPkgCmd = &cobra.Command{
+	Use:           "reinstall [pkg url]",
+	Short:         "reinstall a vim package",
+	Long:          "Use when the package cannot update with a simple pull",
+	SilenceUsage:  true,
+	SilenceErrors: true,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			cmd.Help()
+			return nil
+		}
+
+		for _, pkgName := range args {
+			fmt.Println("Reinstalling " + pkgName)
+			err := pkgmngr.Reinstall(pkgName)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	},
+}
+
 // removePkgCmd represents the command for removing vim packages
 var removePkgCmd = &cobra.Command{
 	Use:           "rm [pkg name]",
@@ -88,7 +112,8 @@ var updatePkgCmd = &cobra.Command{
 			fmt.Println("Updating " + pkgName)
 			wasUpToDate, err := pkgmngr.Update(pkgName)
 			if err != nil {
-				if strings.Contains(err.Error(), "object not found") {
+				if strings.Contains(err.Error(), "object not found") ||
+					strings.Contains(err.Error(), "ssh: handshake failed: knownhosts: key mismatch") {
 					fmt.Println(err.Error())
 					continue
 				}
@@ -125,6 +150,7 @@ var listPkgCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(installPkgCmd)
+	rootCmd.AddCommand(reinstallPkgCmd)
 	rootCmd.AddCommand(removePkgCmd)
 	rootCmd.AddCommand(updatePkgCmd)
 	rootCmd.AddCommand(listPkgCmd)
