@@ -17,6 +17,7 @@ var (
 // installPkgCmd represents the command for installing vim packages
 var installPkgCmd = &cobra.Command{
 	Use:           "install [pkg url]",
+	Aliases:       []string{"add", "i"},
 	Short:         "easily install a vim package",
 	SilenceUsage:  true,
 	SilenceErrors: true,
@@ -64,7 +65,7 @@ var reinstallPkgCmd = &cobra.Command{
 // removePkgCmd represents the command for removing vim packages
 var removePkgCmd = &cobra.Command{
 	Use:           "rm [pkg name]",
-	Aliases:       []string{"remove"},
+	Aliases:       []string{"remove", "delete"},
 	Short:         "easily remove a vim package",
 	SilenceUsage:  true,
 	SilenceErrors: true,
