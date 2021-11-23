@@ -77,6 +77,27 @@ func Update(pkgName string) (bool, error) {
 This can happen when the package was shallow installed, and needs repairing.
 Try reinstalling the package with the url to see if this fixes the issue.`)
 		}
+		if strings.Contains(err.Error(), "ssh: handshake failed: knownhosts: key mismatch") {
+			userHomeDir, err := os.UserHomeDir()
+			if err != nil {
+				fmt.Errorf(err.Error())
+			}
+			fmt.Println(fmt.Sprintf(`%s cannot connect to its remote host over ssh.
+If you have not set up ssh connections with your git server you will need to
+follow the appropriate guide to do so. If you have set up ssh and this error
+does not appear when you git clone using ssh then you likely have an outdated
+or non-prioritized ssh fingerprint from the host that prion's dependencies are
+attempting to use. This could be from the host updating its public key
+fingerprint or using different key types; rsa or ed25519.
+
+
+You can attempt to resolve this by running the below command to update your
+known hosts for you. Replace github.com if you are using a different remote
+host.
+
+ssh-keyscan -H github.com >> %s/.ssh/known_hosts
+`, pkgName, userHomeDir))
+		}
 		return false, err
 	}
 	return false, nil
